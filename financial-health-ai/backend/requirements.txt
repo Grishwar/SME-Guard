@@ -11,3 +11,4 @@ cryptography
 python-multipart
 reportlab
 groq
+PyPDF2
