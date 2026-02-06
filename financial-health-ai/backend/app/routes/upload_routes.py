@@ -5,8 +5,8 @@ from PyPDF2 import PdfReader
 import openpyxl
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.database import get_db  # ✅ Ensure this path matches your project structure
-from app.models import FinancialData # ✅ Ensure this matches your model name
+from ..database import get_db
+from ..models import FinancialData
 
 router = APIRouter()
 
