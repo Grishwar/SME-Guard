@@ -25,6 +25,10 @@ export default function FinPilotFinalStable() {
   const runAnalysis = async () => {
     if (!file) return alert("UPLOAD STATEMENT (CSV/XLSX/PDF)");
     setLoading(true);
+    
+    // ✅ MODIFIED: CLEAR OLD DATA BEFORE STARTING NEW ANALYSIS
+    setData({}); 
+    
     try {
       await uploadFile(file, industry);
       const [h, r, c, s, l] = await Promise.all([
@@ -136,7 +140,6 @@ export default function FinPilotFinalStable() {
           </div>
           <textarea value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Type strategic question..." className="w-full h-56 md:h-80 bg-slate-800/40 p-10 md:p-14 rounded-[50px] mb-12 text-3xl md:text-5xl font-black text-center focus:ring-8 focus:ring-emerald-500/10 outline-none border border-slate-700 text-white" />
           
-          {/* ✅ MODIFIED LOGIC: Added async/await and loading state for the Advisor button */}
           <button onClick={async ()=>{ 
              setAiAnswer("Initializing strategic analysis..."); 
              try {
