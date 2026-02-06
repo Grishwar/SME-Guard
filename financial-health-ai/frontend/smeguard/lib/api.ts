@@ -1,12 +1,14 @@
 import axios from "axios";
 
+// ✅ Dynamically use your Vercel Environment Variable or fallback to the live link
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://sme-guard.onrender.com";
+
 const API = axios.create({
-  baseURL: "https://sme-guard.onrender.com", 
+  baseURL: API_BASE_URL, 
 });
 
 export default API;
 
-// Supports CSV, XLSX, and PDF as per requirements
 export const uploadFile = (file: File, industry: string) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -25,6 +27,8 @@ export const getLoanEligibility = () => API.get("/loan-eligibility");
 export const askCFO = (question: string, language: string) => 
   API.post("/cfo/ask", { question, language });
 
-// PDF Engine Implementation
-export const downloadReport = () => 
-  API.get("/investor-report", { responseType: 'blob' });
+// ✅ RECTIFIED: Points to live Render instead of local machine
+export const downloadReport = () => {
+  const reportUrl = `${API_BASE_URL}/investor-report`;
+  window.open(reportUrl, "_blank");
+};

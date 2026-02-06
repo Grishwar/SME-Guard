@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { uploadFile, getHealthScore, getRiskAnalysis, getCreditScore, askCFO, getDashboardSummary, getLoanEligibility } from "@/lib/api"
+// ✅ Ensure downloadReport is imported from your lib/api
+import { uploadFile, getHealthScore, getRiskAnalysis, getCreditScore, askCFO, getDashboardSummary, getLoanEligibility, downloadReport } from "@/lib/api"
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell, LabelList } from "recharts"
 import { ShieldAlert, Activity, CreditCard, Download, Globe, AlertOctagon, Landmark, Briefcase, TrendingUp } from "lucide-react"
 
@@ -16,15 +17,9 @@ export default function FinPilotFinalStable() {
   const [lang, setLang] = useState("English");
   const [chartType, setChartType] = useState<"area" | "bar" | "pie">("area");
 
-  // ✅ RECTIFIED: DIRECT DOWNLOAD TO AVOID AXIOS NETWORK ERROR
+  // ✅ MODIFIED LOGIC: Use the production API instead of hardcoded 127.0.0.1
   const handlePDFDownload = () => {
-    const reportUrl = "http://127.0.0.1:8000/investor-report";
-    const link = document.createElement('a');
-    link.href = reportUrl;
-    link.setAttribute('download', 'SME_Investor_Report.pdf');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    downloadReport(); // This function should be defined in your lib/api.ts to open the live Render URL
   };
 
   const runAnalysis = async () => {
@@ -81,7 +76,6 @@ export default function FinPilotFinalStable() {
       </header>
 
       <main className="max-w-7xl mx-auto space-y-12 md:space-y-20 text-center">
-        {/* RECTIFIED: CENTERED BANNER WITH OVERFLOW FIX */}
         <div className="p-10 bg-slate-900/60 rounded-[50px] border-b-4 border-amber-500 flex flex-col items-center overflow-hidden">
           <TrendingUp className="text-amber-500 mb-6" /> 
           <p className="text-2xl md:text-4xl font-black italic uppercase leading-snug break-words">
@@ -96,7 +90,6 @@ export default function FinPilotFinalStable() {
           <StatusCard label="Bankruptcy" value="Stable" icon={<AlertOctagon className="text-amber-400" />} />
         </div>
 
-        {/* RECTIFIED: ALWAYS-ON LABELS FOR CHARTS */}
         <div className="bg-slate-900/60 p-8 md:p-16 rounded-[60px] border-b-4 border-emerald-500 shadow-3xl overflow-hidden">
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {["area", "bar", "pie"].map((type: any) => (
@@ -109,14 +102,14 @@ export default function FinPilotFinalStable() {
                 <AreaChart data={chartData} margin={{top: 30, right: 30, left: 30, bottom: 20}}>
                   <XAxis dataKey="name" stroke="#94a3b8" />
                   <Area type="monotone" dataKey="val" stroke="#10b981" fill="#10b981" fillOpacity={0.15} strokeWidth={4}>
-                     <LabelList dataKey="val" position="top" fill="#10b981" formatter={(v:any) => `₹${(v/1000).toFixed(0)}K`} style={{fontWeight:'bold'}} />
+                      <LabelList dataKey="val" position="top" fill="#10b981" formatter={(v:any) => `₹${(v/1000).toFixed(0)}K`} style={{fontWeight:'bold'}} />
                   </Area>
                 </AreaChart>
               ) : chartType === "bar" ? (
                 <BarChart data={chartData} margin={{top: 30}}>
                   <XAxis dataKey="name" stroke="#94a3b8" />
                   <Bar dataKey="val" fill="#10b981" radius={[15, 15, 0, 0]}>
-                     <LabelList dataKey="val" position="top" fill="#10b981" formatter={(v:any) => `₹${(v/1000).toFixed(0)}K`} style={{fontWeight:'bold'}} />
+                      <LabelList dataKey="val" position="top" fill="#10b981" formatter={(v:any) => `₹${(v/1000).toFixed(0)}K`} style={{fontWeight:'bold'}} />
                   </Bar>
                 </BarChart>
               ) : (
@@ -130,13 +123,11 @@ export default function FinPilotFinalStable() {
           </div>
         </div>
 
-        {/* DATA PANELS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           <DataPanel title="Automated Bookkeeping" icon={<Briefcase className="text-emerald-400" />} type="bookkeeping" data={data.summary} />
           <DataPanel title="Pre-Approved Bank Offers" icon={<Landmark className="text-cyan-400" />} type="banking" />
         </div>
 
-        {/* AI ADVISOR */}
         <div className="bg-slate-900/60 p-10 md:p-20 rounded-[80px] border-b-4 border-amber-500 shadow-2xl flex flex-col items-center">
           <Globe className="text-amber-500 mb-10" />
           <div className="flex gap-4 mb-10">
@@ -144,7 +135,18 @@ export default function FinPilotFinalStable() {
                <button onClick={()=>setLang("Tamil")} className={`px-12 py-3 rounded-full font-black uppercase text-xs ${lang==='Tamil'?'bg-emerald-500 text-black':'bg-slate-800'}`}>தமிழ்</button>
           </div>
           <textarea value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Type strategic question..." className="w-full h-56 md:h-80 bg-slate-800/40 p-10 md:p-14 rounded-[50px] mb-12 text-3xl md:text-5xl font-black text-center focus:ring-8 focus:ring-emerald-500/10 outline-none border border-slate-700 text-white" />
-          <button onClick={async ()=>{ const res = await askCFO(query, lang); setAiAnswer(res.data.answer); }} className="w-full py-8 md:py-12 bg-amber-500 text-slate-900 text-3xl md:text-5xl font-black rounded-[45px] transition-all uppercase italic">Consult Advisor</button>
+          
+          {/* ✅ MODIFIED LOGIC: Added async/await and loading state for the Advisor button */}
+          <button onClick={async ()=>{ 
+             setAiAnswer("Initializing strategic analysis..."); 
+             try {
+               const res = await askCFO(query, lang); 
+               setAiAnswer(res.data.answer); 
+             } catch (err) {
+               setAiAnswer("Strategic core offline. Verify backend status.");
+             }
+          }} className="w-full py-8 md:py-12 bg-amber-500 text-slate-900 text-3xl md:text-5xl font-black rounded-[45px] transition-all uppercase italic">Consult Advisor</button>
+          
           {aiAnswer && <div className="mt-16 text-2xl md:text-4xl leading-relaxed text-slate-200 p-10 md:p-20 bg-slate-800/40 rounded-[60px] border-l-[20px] border-amber-500 italic font-bold break-words whitespace-pre-wrap">{aiAnswer}</div>}
         </div>
       </main>
