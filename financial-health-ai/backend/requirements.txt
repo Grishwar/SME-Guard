@@ -12,3 +12,4 @@ python-multipart
 reportlab
 groq
 PyPDF2
+openpyxl
