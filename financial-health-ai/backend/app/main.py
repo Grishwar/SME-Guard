@@ -1,58 +1,57 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import traceback
 
 # ✅ Database
 from app.database.database import Base, engine
 
-# ✅ Import ALL routers (ONLY ONCE)
+# ✅ Import routers
 from app.routes import (
-    upload_routes,
-    chatbot_routes,
-    credit_routes,
-    risk_routes,
-    forecast_routes,
-    banking_routes,
-    benchmark_routes,
-    report_routes,
-    gst_routes,
-    health_routes,
-    loan_routes,
-    bankruptcy_routes,
-    dashboard_routes,
-    cfo_routes
+    upload_routes, chatbot_routes, credit_routes, risk_routes,
+    forecast_routes, banking_routes, benchmark_routes, report_routes,
+    gst_routes, health_routes, loan_routes, bankruptcy_routes,
+    dashboard_routes, cfo_routes
 )
 
-# ✅ Create FastAPI App
 app = FastAPI(
     title="FinPilot AI — Financial Copilot",
     version="1.0",
-    debug=False
+    debug=True # Set to True to help catch startup issues
 )
 
-# ✅ AUTO CREATE TABLES (VERY IMPORTANT)
+# ✅ Auto Create Tables
 Base.metadata.create_all(bind=engine)
 
-# ✅ Enable CORS (Needed for React / NextJS)
+# ✅ RECTIFIED CORS: Explicitly allow your Vercel domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # change later for production
+    allow_origins=[
+        "https://sme-guard.vercel.app",  # Your primary deployment
+        "https://smeguard.netlify.app", # Your backup deployment
+        "http://localhost:3000"          # For local testing
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Global Error Handler (Judges LOVE clean APIs)
+# ✅ RECTIFIED ERROR HANDLER: Shows real errors for debugging
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+    # This prints the full error track to your Render logs
+    print(f"CORE ENGINE ERROR: {traceback.format_exc()}")
+    
     return JSONResponse(
         status_code=500,
         content={
-            "message": "Something went wrong. Please try again."
+            "status": "error",
+            "message": "Core Engine Error",
+            "detail": str(exc) # Shows the real error to the frontend
         },
     )
 
-# ✅ Register Routers (NO DUPLICATES)
+# ✅ Register Routers
 app.include_router(upload_routes.router)
 app.include_router(chatbot_routes.router)
 app.include_router(credit_routes.router)
@@ -68,9 +67,6 @@ app.include_router(bankruptcy_routes.router)
 app.include_router(dashboard_routes.router)
 app.include_router(cfo_routes.router)
 
-# ✅ Root Health Check
 @app.get("/")
 def home():
-    return {
-        "status": "FinPilot AI running successfully 🚀"
-    }
+    return {"status": "FinPilot AI running successfully 🚀"}
