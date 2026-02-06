@@ -1,0 +1,8 @@
+node_modules
+.next
+.env
+venv
+__pycache__
+temp_uploads
+dist
+*.log
