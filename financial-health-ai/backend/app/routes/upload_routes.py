@@ -3,11 +3,15 @@ import io
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from PyPDF2 import PdfReader
 import openpyxl
+from typing import Optional # ✅ Added for optional support
 
 router = APIRouter()
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), industry: str = Form(...)):
+async def upload_file(
+    file: UploadFile = File(...), 
+    industry: Optional[str] = Form(None) # ✅ Changed to Optional
+):
     contents = await file.read()
     filename = file.filename.lower()
     
@@ -25,6 +29,13 @@ async def upload_file(file: UploadFile = File(...), industry: str = Form(...)):
         else:
             raise HTTPException(status_code=400, detail="Unsupported format")
 
-        return {"status": "success", "industry": industry, "rows": len(df)}
+        # ✅ Return success even if industry is missing
+        return {
+            "status": "success", 
+            "industry": industry if industry else "Not Specified", 
+            "rows": len(df)
+        }
     except Exception as e:
+        # ✅ Detailed error logging for your Render logs
+        print(f"UPLOAD ERROR: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Engine Error: {str(e)}")
