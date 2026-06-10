@@ -5,7 +5,11 @@ from app.routes import loan_routes
 from app.routes import bankruptcy_routes
 from app.routes import dashboard_routes
 from app.routes import banking_routes
+from app.database.database import engine
+from app.database.database import Base
 
+from app.models.financial_model import Financial
+from app.models.user_model import User
 
 from app.routes import (
     upload_routes,
@@ -18,7 +22,7 @@ from app.routes import (
     report_routes
    
 )
-
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="FinPilot AI")
 
 
