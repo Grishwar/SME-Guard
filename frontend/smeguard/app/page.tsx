@@ -67,7 +67,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 p-8">
+    <main className="min-h-screen bg-gray-100 p-8 text-black">
       <div className="max-w-6xl mx-auto">
 
         <h1 className="text-5xl font-bold text-center mb-8">
@@ -105,7 +105,7 @@ export default function Home() {
           <>
             <div className="grid md:grid-cols-3 gap-6 mb-8">
 
-              <div className="bg-white p-6 rounded-xl shadow">
+              <div className="bg-white p-6 rounded-xl shadow text-black">
                 <h3 className="font-bold text-xl">
                   Credit Score
                 </h3>
