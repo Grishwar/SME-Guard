@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+
+.env
+venv/
+
+backend/temp_uploads/
+backend/reports/
+
+frontend/smeguard/.next/
+frontend/smeguard/node_modules/
+
+node_modules/
+.next/
